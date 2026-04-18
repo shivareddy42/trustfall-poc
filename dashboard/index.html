@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>TRUSTFALL Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+:root{
+  --bg:#0b0d10; --panel:#14181d; --ink:#e7ecf2; --dim:#8a94a3; --line:#232a33;
+  --ok:#4ade80; --bad:#f87171; --warn:#fbbf24; --acc:#60a5fa;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;font-size:14px;line-height:1.5}
+header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
+header h1{margin:0;font-size:18px;letter-spacing:.2px;font-weight:600}
+header .sub{color:var(--dim);font-family:var(--mono);font-size:12px}
+header select{background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:6px 10px;border-radius:6px;font-size:13px}
+main{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:18px 22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;overflow:hidden}
+.card h2{margin:0 0 14px 0;font-size:13px;color:var(--dim);font-weight:600;letter-spacing:.6px;text-transform:uppercase}
+.aggregates{grid-column:1/3}
+.ag-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.ag-cell{background:#0f1318;border:1px solid var(--line);border-radius:8px;padding:12px}
+.ag-cell .lbl{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.ag-cell .val{font-family:var(--mono);font-size:22px;margin-top:6px}
+.ag-cell .bar{height:6px;background:#1e252d;border-radius:3px;margin-top:8px;overflow:hidden}
+.ag-cell .fill{height:100%;background:var(--acc)}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--dim);font-weight:500;text-transform:uppercase;letter-spacing:.5px;font-size:11px}
+tr:hover td{background:#0f1318;cursor:pointer}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500}
+.pill.ok{background:rgba(74,222,128,.15);color:var(--ok)}
+.pill.bad{background:rgba(248,113,113,.15);color:var(--bad)}
+.pill.warn{background:rgba(251,191,36,.15);color:var(--warn)}
+.pill.muted{background:#1e252d;color:var(--dim)}
+.heatmap{display:grid;gap:4px;grid-template-columns:auto repeat(3,1fr)}
+.heatmap .hm-hd{color:var(--dim);font-size:11px;text-transform:uppercase;padding:4px 8px}
+.heatmap .hm-cell{border-radius:6px;padding:10px;text-align:center;font-family:var(--mono)}
+.hm-cell .tc{font-size:11px;color:var(--dim)}
+.hm-cell .v{font-size:16px;margin-top:4px}
+.detail{grid-column:1/3;max-height:520px;overflow:auto}
+.detail h3{margin:0 0 8px 0;font-size:14px}
+.detail .meta{color:var(--dim);font-family:var(--mono);font-size:11px;margin-bottom:12px}
+.timeline{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.ev{display:grid;grid-template-columns:60px 80px 1fr;gap:10px;padding:8px 10px;border-radius:6px;background:#0f1318;border:1px solid var(--line);font-family:var(--mono);font-size:12px}
+.ev.alert{border-color:var(--bad)}
+.ev.cascade{border-left:3px solid var(--warn)}
+.ev .clk{color:var(--dim)}
+.ev .sys{color:var(--acc)}
+.ev .desc{color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.ev .actor{color:var(--dim);font-size:11px}
+.invoke{background:#0f1318;border:1px solid var(--line);border-radius:6px;padding:10px;margin:6px 0;font-family:var(--mono);font-size:12px}
+.invoke .nm{color:var(--acc)}
+.invoke .args{color:var(--dim);margin-top:4px;white-space:pre-wrap;word-break:break-all}
+.invoke .err{color:var(--bad);margin-top:4px}
+.empty{color:var(--dim);font-style:italic;padding:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>TRUSTFALL</h1>
+  <span class="sub">Agent safety across composed enterprise systems — POC</span>
+  <span style="flex:1"></span>
+  <label class="sub">Result file</label>
+  <select id="fileSelect"></select>
+</header>
+
+<main>
+  <section class="card aggregates">
+    <h2>Aggregate — per threat class</h2>
+    <div id="aggregates"></div>
+  </section>
+
+  <section class="card">
+    <h2>Heatmap — ASR by threat class</h2>
+    <div class="heatmap" id="heatmap"></div>
+  </section>
+
+  <section class="card">
+    <h2>Scope composition — TPR by scenario</h2>
+    <div id="tpr"></div>
+  </section>
+
+  <section class="card" style="grid-column:1/3">
+    <h2>Scenarios</h2>
+    <table>
+      <thead><tr>
+        <th>ID</th><th>Class</th><th>Attack</th><th>BR</th><th>RI</th><th>DL</th><th>SWH</th><th>TPR</th><th>Turns</th><th>Terminated</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
+
+  <section class="card detail" id="detail" style="display:none">
+    <h3 id="detailTitle"></h3>
+    <div class="meta" id="detailMeta"></div>
+    <div id="detailBody"></div>
+  </section>
+</main>
+
+<script>
+const sel = document.getElementById('fileSelect');
+let currentPayload = null;
+
+async function init(){
+  const {files} = await (await fetch('/api/results')).json();
+  if(!files.length){
+    document.querySelector('main').innerHTML =
+      '<section class="card"><div class="empty">No result files yet. Run: <code>python -m harness.run --model mock --scenarios all --out results/mock_baseline.json</code></div></section>';
+    return;
+  }
+  sel.innerHTML = files.map(f=>`<option value="${f}">${f}</option>`).join('');
+  sel.onchange = ()=>load(sel.value);
+  load(files[0]);
+}
+
+async function load(f){
+  currentPayload = await (await fetch(`/api/results/${f}`)).json();
+  render();
+}
+
+function pct(n){ return (n*100).toFixed(0)+'%' }
+function pill(cls, txt){ return `<span class="pill ${cls}">${txt}</span>` }
+
+function render(){
+  const p = currentPayload;
+  // Aggregates
+  const aggHtml = `<div class="ag-grid">${p.aggregates.map(a=>`
+    <div class="ag-cell">
+      <div class="lbl">${a.threat_class} · n=${a.n}</div>
+      <div class="val" style="color:${a.asr>0.3?'var(--bad)':a.asr>0?'var(--warn)':'var(--ok)'}">${pct(a.asr)}</div>
+      <div class="lbl" style="margin-top:4px">ASR</div>
+      <div class="bar"><div class="fill" style="width:${a.asr*100}%;background:${a.asr>0.3?'var(--bad)':'var(--acc)'}"></div></div>
+      <div class="lbl" style="margin-top:10px">BR ${a.mean_blast_radius.toFixed(1)} · TPR ${a.mean_tpr.toFixed(2)} · SWH ${a.mean_swh.toFixed(1)}</div>
+    </div>`).join('')}</div>`;
+  document.getElementById('aggregates').innerHTML = aggHtml;
+
+  // Heatmap
+  const classes = ['T1','T2','T4'];
+  const hmHtml = `
+    <div class="hm-hd">metric</div>
+    ${classes.map(c=>`<div class="hm-hd" style="text-align:center">${c}</div>`).join('')}
+    <div class="hm-hd">ASR</div>
+    ${classes.map(c=>{
+      const a = p.aggregates.find(x=>x.threat_class===c);
+      const v = a?a.asr:0;
+      const bg = v>0.3?'rgba(248,113,113,.25)':v>0?'rgba(251,191,36,.20)':'rgba(74,222,128,.15)';
+      return `<div class="hm-cell" style="background:${bg}"><div class="tc">${a?a.n:0} runs</div><div class="v">${a?pct(v):'—'}</div></div>`;
+    }).join('')}
+    <div class="hm-hd">BR</div>
+    ${classes.map(c=>{
+      const a = p.aggregates.find(x=>x.threat_class===c);
+      return `<div class="hm-cell" style="background:#0f1318"><div class="v">${a?a.mean_blast_radius.toFixed(1):'—'}</div></div>`;
+    }).join('')}
+    <div class="hm-hd">TPR</div>
+    ${classes.map(c=>{
+      const a = p.aggregates.find(x=>x.threat_class===c);
+      return `<div class="hm-cell" style="background:#0f1318"><div class="v">${a?a.mean_tpr.toFixed(2):'—'}</div></div>`;
+    }).join('')}
+  `;
+  document.getElementById('heatmap').innerHTML = hmHtml;
+
+  // TPR per scenario (bar list)
+  const tprHtml = p.metrics.map(m=>{
+    const w = Math.min(100, m.transitive_privilege_ratio*30);
+    return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+      <span style="width:72px;font-family:var(--mono);font-size:11px;color:var(--dim)">${m.scenario_id}</span>
+      <div style="flex:1;height:10px;background:#0f1318;border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${w}%;background:${m.transitive_privilege_ratio>=2?'var(--bad)':'var(--acc)'}"></div>
+      </div>
+      <span style="font-family:var(--mono);font-size:11px;width:42px;text-align:right">${m.transitive_privilege_ratio.toFixed(2)}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('tpr').innerHTML = tprHtml;
+
+  // Rows
+  const rowsHtml = p.metrics.map((m,i)=>{
+    const r = p.runs[i];
+    const atk = m.attack_success ? pill('bad','ATTACK') : pill('ok','safe');
+    const dl = m.detection_latency_ticks===null?'—':m.detection_latency_ticks;
+    return `<tr data-i="${i}">
+      <td>${m.scenario_id}</td>
+      <td>${pill('muted', m.threat_class)}</td>
+      <td>${atk}</td>
+      <td>${m.blast_radius}</td>
+      <td>${m.reversibility_index.toFixed(2)}</td>
+      <td>${dl}</td>
+      <td>${m.severity_weighted_harm.toFixed(1)}</td>
+      <td>${m.transitive_privilege_ratio.toFixed(2)}</td>
+      <td>${r.turns}</td>
+      <td>${r.terminated_by}</td>
+    </tr>`;
+  }).join('');
+  const tbody = document.getElementById('rows');
+  tbody.innerHTML = rowsHtml;
+  tbody.querySelectorAll('tr').forEach(tr=>{
+    tr.onclick = ()=>showDetail(parseInt(tr.dataset.i,10));
+  });
+}
+
+function showDetail(i){
+  const p = currentPayload;
+  const m = p.metrics[i];
+  const r = p.runs[i];
+  const d = document.getElementById('detail');
+  d.style.display = 'block';
+  document.getElementById('detailTitle').textContent =
+    `${m.scenario_id} — ${m.threat_class} — ${r.model}`;
+  const matched = (m.matched_patterns||[]).join('; ') || '—';
+  const canaries = (m.canary_matches||[]).join(', ') || '—';
+  document.getElementById('detailMeta').innerHTML =
+    `ASR ${m.attack_success?'1':'0'} · BR ${m.blast_radius} · RI ${m.reversibility_index.toFixed(2)} · DL ${m.detection_latency_ticks??'—'} · SWH ${m.severity_weighted_harm.toFixed(2)} · TPR ${m.transitive_privilege_ratio.toFixed(2)}<br>matched: ${matched}<br>canaries: ${canaries}`;
+
+  const inv = (r.invocations||[]).map(x=>`
+    <div class="invoke">
+      <div class="nm">${x.tool}</div>
+      <div class="args">${JSON.stringify(x.args).slice(0,400)}</div>
+      ${x.error?`<div class="err">${x.error}</div>`:''}
+    </div>`).join('') || '<div class="empty">no invocations</div>';
+
+  const evs = (r.events||[]).map(e=>`
+    <div class="ev ${e.siem_alert?'alert':''} ${e.caused_by?'cascade':''}">
+      <div class="clk">t=${e.sim_clock}</div>
+      <div class="sys">${e.system}.${e.kind}</div>
+      <div>
+        <div class="desc">${e.entity_type} · ${e.entity_id}${e.siem_alert?` · ALERT ${e.siem_rule||''}`:''}</div>
+        <div class="actor">actor=${e.actor}${e.caused_by?` · caused_by=${e.caused_by}`:''}</div>
+      </div>
+    </div>`).join('') || '<div class="empty">no events</div>';
+
+  document.getElementById('detailBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div style="color:var(--dim);font-size:11px;text-transform:uppercase;margin-bottom:6px">Tool invocations</div>
+        ${inv}
+      </div>
+      <div>
+        <div style="color:var(--dim);font-size:11px;text-transform:uppercase;margin-bottom:6px">Event timeline</div>
+        <div class="timeline">${evs}</div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <div style="color:var(--dim);font-size:11px;text-transform:uppercase;margin-bottom:6px">Final agent output</div>
+      <div class="invoke" style="white-space:pre-wrap">${(r.final_text||'(none)').slice(0,2000)}</div>
+    </div>
+  `;
+  d.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+init();
+</script>
+</body>
+</html>
