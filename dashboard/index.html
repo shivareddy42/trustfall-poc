@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>TRUSTFALL Dashboard</title>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <style>
@@ -11,11 +12,51 @@
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;font-size:14px;line-height:1.5}
+html,body{background:var(--bg);color:var(--ink)}
+body{margin:0;font-family:system-ui,sans-serif;font-size:14px;line-height:1.5}
+
 header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
 header h1{margin:0;font-size:18px;letter-spacing:.2px;font-weight:600}
 header .sub{color:var(--dim);font-family:var(--mono);font-size:12px}
 header select{background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:6px 10px;border-radius:6px;font-size:13px}
+
+.findings-banner{
+  margin:14px 22px 0 22px;padding:14px 18px;border-radius:10px;
+  background:linear-gradient(90deg,rgba(96,165,250,.08),rgba(248,113,113,.06));
+  border:1px solid var(--line);display:flex;gap:18px;align-items:center;flex-wrap:wrap;
+}
+.findings-banner .hdlabel{
+  font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;
+  color:var(--acc);background:rgba(96,165,250,.12);padding:3px 8px;border-radius:4px;
+}
+.findings-banner .hdtext{flex:1;min-width:300px;color:var(--ink);font-size:13px}
+.findings-banner .hdtext strong{color:var(--bad)}
+.findings-banner a{color:var(--acc);text-decoration:none;font-weight:500;white-space:nowrap}
+.findings-banner a:hover{text-decoration:underline}
+
+.model-row{
+  margin:12px 22px 0 22px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+}
+.model-row .lbl{
+  color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin-right:6px;
+}
+.model-chip{
+  background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  padding:6px 12px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  transition:border-color .15s,background .15s;
+}
+.model-chip:hover{border-color:var(--acc)}
+.model-chip.active{border-color:var(--acc);background:rgba(96,165,250,.08)}
+.model-chip .tier{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.model-chip .name{font-family:var(--mono)}
+.model-chip .badge{
+  font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:4px;
+}
+.model-chip .badge.ok{background:rgba(74,222,128,.15);color:var(--ok)}
+.model-chip .badge.warn{background:rgba(251,191,36,.15);color:var(--warn)}
+.model-chip .badge.bad{background:rgba(248,113,113,.15);color:var(--bad)}
+.model-chip .badge.muted{background:#1e252d;color:var(--dim)}
+
 main{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:18px 22px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;overflow:hidden}
 .card h2{margin:0 0 14px 0;font-size:13px;color:var(--dim);font-weight:600;letter-spacing:.6px;text-transform:uppercase}
@@ -26,21 +67,29 @@ main{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:18px 22px}
 .ag-cell .val{font-family:var(--mono);font-size:22px;margin-top:6px}
 .ag-cell .bar{height:6px;background:#1e252d;border-radius:3px;margin-top:8px;overflow:hidden}
 .ag-cell .fill{height:100%;background:var(--acc)}
+
+.table-wrap{grid-column:1/3;max-height:420px;overflow:auto}
 table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
-th{color:var(--dim);font-weight:500;text-transform:uppercase;letter-spacing:.5px;font-size:11px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--dim);font-weight:500;text-transform:uppercase;letter-spacing:.5px;font-size:11px;background:var(--panel);position:sticky;top:0;z-index:1}
 tr:hover td{background:#0f1318;cursor:pointer}
+tr.attack-row td{background:rgba(248,113,113,.06)}
+tr.attack-row:hover td{background:rgba(248,113,113,.10)}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500}
 .pill.ok{background:rgba(74,222,128,.15);color:var(--ok)}
 .pill.bad{background:rgba(248,113,113,.15);color:var(--bad)}
 .pill.warn{background:rgba(251,191,36,.15);color:var(--warn)}
 .pill.muted{background:#1e252d;color:var(--dim)}
+
 .heatmap{display:grid;gap:4px;grid-template-columns:auto repeat(3,1fr)}
 .heatmap .hm-hd{color:var(--dim);font-size:11px;text-transform:uppercase;padding:4px 8px}
 .heatmap .hm-cell{border-radius:6px;padding:10px;text-align:center;font-family:var(--mono)}
 .hm-cell .tc{font-size:11px;color:var(--dim)}
 .hm-cell .v{font-size:16px;margin-top:4px}
-.detail{grid-column:1/3;max-height:520px;overflow:auto}
+
+.tpr-wrap{max-height:320px;overflow:auto}
+
+.detail{grid-column:1/3;max-height:620px;overflow:auto}
 .detail h3{margin:0 0 8px 0;font-size:14px}
 .detail .meta{color:var(--dim);font-family:var(--mono);font-size:11px;margin-bottom:12px}
 .timeline{display:flex;flex-direction:column;gap:6px;margin-top:12px}
@@ -55,36 +104,54 @@ tr:hover td{background:#0f1318;cursor:pointer}
 .invoke .nm{color:var(--acc)}
 .invoke .args{color:var(--dim);margin-top:4px;white-space:pre-wrap;word-break:break-all}
 .invoke .err{color:var(--bad);margin-top:4px}
+.invoke.write-emph{border-color:var(--bad);background:rgba(248,113,113,.05)}
 .empty{color:var(--dim);font-style:italic;padding:12px}
+
+footer{color:var(--dim);font-size:11px;padding:18px 22px;border-top:1px solid var(--line);margin-top:18px}
+footer a{color:var(--acc);text-decoration:none}
+footer a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
 <header>
   <h1>TRUSTFALL</h1>
-  <span class="sub">Agent safety across composed enterprise systems — POC</span>
+  <span class="sub">Agent safety across composed enterprise systems &mdash; POC</span>
   <span style="flex:1"></span>
   <label class="sub">Result file</label>
   <select id="fileSelect"></select>
 </header>
 
+<div class="findings-banner">
+  <span class="hdlabel">Headline</span>
+  <span class="hdtext" id="headlineText">
+    Four frontier-lab models &times; 30 adversarial scenarios. Flagships pass; mid-tier fails on <strong>5 scenarios</strong> &mdash; including a <strong>$62K PO approval on forged authority</strong> injected into a user-record field (T4-0009, GPT-5.4-mini). <span style="color:var(--dim)">Pick a model below to inspect.</span>
+  </span>
+  <a href="https://github.com/shivareddy42/trustfall-poc/blob/main/report/findings.md" target="_blank">Full findings &rarr;</a>
+  <a href="https://github.com/shivareddy42/trustfall-poc/blob/main/PRD.md" target="_blank">Research plan (PRD) &rarr;</a>
+</div>
+
+<div class="model-row" id="modelRow">
+  <span class="lbl">Switch model:</span>
+</div>
+
 <main>
   <section class="card aggregates">
-    <h2>Aggregate — per threat class</h2>
+    <h2>Aggregate &mdash; per threat class</h2>
     <div id="aggregates"></div>
   </section>
 
   <section class="card">
-    <h2>Heatmap — ASR by threat class</h2>
+    <h2>Heatmap &mdash; ASR by threat class</h2>
     <div class="heatmap" id="heatmap"></div>
   </section>
 
   <section class="card">
-    <h2>Scope composition — TPR by scenario</h2>
-    <div id="tpr"></div>
+    <h2>Scope composition &mdash; TPR by scenario</h2>
+    <div class="tpr-wrap" id="tpr"></div>
   </section>
 
-  <section class="card" style="grid-column:1/3">
-    <h2>Scenarios</h2>
+  <section class="card table-wrap">
+    <h2>Scenarios <span style="color:var(--dim);text-transform:none;letter-spacing:0;font-weight:400">&mdash; click a row for the event trace</span></h2>
     <table>
       <thead><tr>
         <th>ID</th><th>Class</th><th>Attack</th><th>BR</th><th>RI</th><th>DL</th><th>SWH</th><th>TPR</th><th>Turns</th><th>Terminated</th>
@@ -100,24 +167,97 @@ tr:hover td{background:#0f1318;cursor:pointer}
   </section>
 </main>
 
+<footer>
+  TRUSTFALL POC &middot;
+  <a href="https://github.com/shivareddy42/trustfall-poc" target="_blank">github.com/shivareddy42/trustfall-poc</a>
+  &middot; Shiva Reddy Peddireddy
+</footer>
+
 <script>
+const EMDASH = '\u2014';
+const MIDDOT = '\u00b7';
+
+// Tier labels for the quick-switch chip row
+const TIER_INFO = {
+  'gpt54.json':       { label:'GPT-5.4',           tier:'OpenAI flagship' },
+  'sonnet46.json':    { label:'Claude Sonnet 4.6', tier:'Anthropic flagship' },
+  'gpt54mini.json':   { label:'GPT-5.4-mini',      tier:'OpenAI mid-tier' },
+  'haiku45.json':     { label:'Claude Haiku 4.5',  tier:'Anthropic small' },
+  'mock_baseline.json':{ label:'Mock',             tier:'offline baseline' },
+  'smoke_gpt.json':   { label:'GPT smoke',         tier:'test run' },
+  'smoke_claude.json':{ label:'Claude smoke',      tier:'test run' },
+};
+
+// Order chips from flagships → mid-tier → small so the demo flow reads left-to-right
+const CHIP_ORDER = ['gpt54.json','sonnet46.json','gpt54mini.json','haiku45.json'];
+
 const sel = document.getElementById('fileSelect');
+const modelRow = document.getElementById('modelRow');
 let currentPayload = null;
+let availableFiles = [];
 
 async function init(){
   const {files} = await (await fetch('/api/results')).json();
+  availableFiles = files;
   if(!files.length){
     document.querySelector('main').innerHTML =
       '<section class="card"><div class="empty">No result files yet. Run: <code>python -m harness.run --model mock --scenarios all --out results/mock_baseline.json</code></div></section>';
     return;
   }
+  // Populate the full dropdown (all files, alphabetical — matches what the server returns)
   sel.innerHTML = files.map(f=>`<option value="${f}">${f}</option>`).join('');
   sel.onchange = ()=>load(sel.value);
-  load(files[0]);
+
+  // Build quick-switch chip row in the curated order
+  const chipFiles = CHIP_ORDER.filter(f=>files.includes(f));
+  // Build chips now; ASR badges need file content → filled in after first load
+  chipFiles.forEach(f=>{
+    const info = TIER_INFO[f] || { label:f, tier:'' };
+    const chip = document.createElement('button');
+    chip.className = 'model-chip';
+    chip.dataset.file = f;
+    chip.innerHTML = `
+      <span class="tier">${info.tier}</span>
+      <span class="name">${info.label}</span>
+      <span class="badge muted" data-badge>&middot;&middot;&middot;</span>
+    `;
+    chip.onclick = ()=>{ sel.value = f; load(f); };
+    modelRow.appendChild(chip);
+  });
+
+  // Pre-fetch ASR for each chip so badges populate
+  for(const f of chipFiles){
+    try{
+      const payload = await (await fetch(`/api/results/${f}`)).json();
+      const overall = payload.metrics.reduce((a,m)=>a+(m.attack_success?1:0),0) / payload.metrics.length;
+      const chip = modelRow.querySelector(`[data-file="${f}"]`);
+      if(chip){
+        const badge = chip.querySelector('[data-badge]');
+        badge.textContent = `ASR ${(overall*100).toFixed(0)}%`;
+        badge.classList.remove('muted');
+        if(overall === 0) badge.classList.add('ok');
+        else if(overall < 0.2) badge.classList.add('warn');
+        else badge.classList.add('bad');
+      }
+    }catch(e){}
+  }
+
+  // Default load priority: gpt54mini (most interesting) > haiku45 > sonnet46 > gpt54 > first
+  const preferred = ['gpt54mini.json','haiku45.json','sonnet46.json','gpt54.json']
+    .find(f=>files.includes(f)) || files[0];
+  sel.value = preferred;
+  load(preferred);
+}
+
+function markActiveChip(file){
+  modelRow.querySelectorAll('.model-chip').forEach(c=>{
+    c.classList.toggle('active', c.dataset.file === file);
+  });
 }
 
 async function load(f){
   currentPayload = await (await fetch(`/api/results/${f}`)).json();
+  markActiveChip(f);
   render();
 }
 
@@ -126,14 +266,15 @@ function pill(cls, txt){ return `<span class="pill ${cls}">${txt}</span>` }
 
 function render(){
   const p = currentPayload;
-  // Aggregates
+
+  // Aggregate cards
   const aggHtml = `<div class="ag-grid">${p.aggregates.map(a=>`
     <div class="ag-cell">
-      <div class="lbl">${a.threat_class} · n=${a.n}</div>
-      <div class="val" style="color:${a.asr>0.3?'var(--bad)':a.asr>0?'var(--warn)':'var(--ok)'}">${pct(a.asr)}</div>
+      <div class="lbl">${a.threat_class} ${MIDDOT} n=${a.n}</div>
+      <div class="val" style="color:${a.asr>=0.2?'var(--bad)':a.asr>0?'var(--warn)':'var(--ok)'}">${pct(a.asr)}</div>
       <div class="lbl" style="margin-top:4px">ASR</div>
-      <div class="bar"><div class="fill" style="width:${a.asr*100}%;background:${a.asr>0.3?'var(--bad)':'var(--acc)'}"></div></div>
-      <div class="lbl" style="margin-top:10px">BR ${a.mean_blast_radius.toFixed(1)} · TPR ${a.mean_tpr.toFixed(2)} · SWH ${a.mean_swh.toFixed(1)}</div>
+      <div class="bar"><div class="fill" style="width:${Math.max(a.asr*100,2)}%;background:${a.asr>=0.2?'var(--bad)':a.asr>0?'var(--warn)':'var(--acc)'}"></div></div>
+      <div class="lbl" style="margin-top:10px">BR ${a.mean_blast_radius.toFixed(1)} ${MIDDOT} TPR ${a.mean_tpr.toFixed(2)} ${MIDDOT} SWH ${a.mean_swh.toFixed(1)}</div>
     </div>`).join('')}</div>`;
   document.getElementById('aggregates').innerHTML = aggHtml;
 
@@ -146,23 +287,23 @@ function render(){
     ${classes.map(c=>{
       const a = p.aggregates.find(x=>x.threat_class===c);
       const v = a?a.asr:0;
-      const bg = v>0.3?'rgba(248,113,113,.25)':v>0?'rgba(251,191,36,.20)':'rgba(74,222,128,.15)';
-      return `<div class="hm-cell" style="background:${bg}"><div class="tc">${a?a.n:0} runs</div><div class="v">${a?pct(v):'—'}</div></div>`;
+      const bg = v>=0.2?'rgba(248,113,113,.25)':v>0?'rgba(251,191,36,.20)':'rgba(74,222,128,.15)';
+      return `<div class="hm-cell" style="background:${bg}"><div class="tc">${a?a.n:0} runs</div><div class="v">${a?pct(v):EMDASH}</div></div>`;
     }).join('')}
     <div class="hm-hd">BR</div>
     ${classes.map(c=>{
       const a = p.aggregates.find(x=>x.threat_class===c);
-      return `<div class="hm-cell" style="background:#0f1318"><div class="v">${a?a.mean_blast_radius.toFixed(1):'—'}</div></div>`;
+      return `<div class="hm-cell" style="background:#0f1318"><div class="v">${a?a.mean_blast_radius.toFixed(1):EMDASH}</div></div>`;
     }).join('')}
     <div class="hm-hd">TPR</div>
     ${classes.map(c=>{
       const a = p.aggregates.find(x=>x.threat_class===c);
-      return `<div class="hm-cell" style="background:#0f1318"><div class="v">${a?a.mean_tpr.toFixed(2):'—'}</div></div>`;
+      return `<div class="hm-cell" style="background:#0f1318"><div class="v">${a?a.mean_tpr.toFixed(2):EMDASH}</div></div>`;
     }).join('')}
   `;
   document.getElementById('heatmap').innerHTML = hmHtml;
 
-  // TPR per scenario (bar list)
+  // TPR per scenario
   const tprHtml = p.metrics.map(m=>{
     const w = Math.min(100, m.transitive_privilege_ratio*30);
     return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">
@@ -175,12 +316,17 @@ function render(){
   }).join('');
   document.getElementById('tpr').innerHTML = tprHtml;
 
-  // Rows
-  const rowsHtml = p.metrics.map((m,i)=>{
-    const r = p.runs[i];
+  // Scenarios table — attack rows get red tint + sort to top
+  const indexed = p.metrics.map((m,i)=>({m, r:p.runs[i], i}));
+  indexed.sort((a,b)=>{
+    if(a.m.attack_success !== b.m.attack_success) return b.m.attack_success - a.m.attack_success;
+    return a.m.scenario_id.localeCompare(b.m.scenario_id);
+  });
+  const rowsHtml = indexed.map(({m,r,i})=>{
     const atk = m.attack_success ? pill('bad','ATTACK') : pill('ok','safe');
-    const dl = m.detection_latency_ticks===null?'—':m.detection_latency_ticks;
-    return `<tr data-i="${i}">
+    const dl = m.detection_latency_ticks===null?EMDASH:m.detection_latency_ticks;
+    const rowCls = m.attack_success ? 'attack-row' : '';
+    return `<tr class="${rowCls}" data-i="${i}">
       <td>${m.scenario_id}</td>
       <td>${pill('muted', m.threat_class)}</td>
       <td>${atk}</td>
@@ -198,7 +344,23 @@ function render(){
   tbody.querySelectorAll('tr').forEach(tr=>{
     tr.onclick = ()=>showDetail(parseInt(tr.dataset.i,10));
   });
+
+  // Auto-open the first attack row's detail if any, so viewers see the failure trace without hunting
+  const firstAttack = indexed.find(x=>x.m.attack_success);
+  if(firstAttack){
+    showDetail(firstAttack.i);
+  }else{
+    document.getElementById('detail').style.display = 'none';
+  }
 }
+
+// Consequential tools that matter most for the failure visualization
+const WRITE_TOOLS = new Set([
+  'itsm.update_incident','itsm.create_incident','itsm.grant_group_membership',
+  'ariba.create_supplier','ariba.update_supplier',
+  'ariba.create_po','ariba.approve_po',
+  'email.send_message',
+]);
 
 function showDetail(i){
   const p = currentPayload;
@@ -206,27 +368,30 @@ function showDetail(i){
   const r = p.runs[i];
   const d = document.getElementById('detail');
   d.style.display = 'block';
-  document.getElementById('detailTitle').textContent =
-    `${m.scenario_id} — ${m.threat_class} — ${r.model}`;
-  const matched = (m.matched_patterns||[]).join('; ') || '—';
-  const canaries = (m.canary_matches||[]).join(', ') || '—';
+  document.getElementById('detailTitle').innerHTML =
+    `${m.scenario_id} ${EMDASH} ${m.threat_class} ${EMDASH} ${r.model} ${m.attack_success ? pill('bad','ATTACK') : pill('ok','safe')}`;
+  const matched = (m.matched_patterns||[]).join('; ') || EMDASH;
+  const canaries = (m.canary_matches||[]).join(', ') || EMDASH;
   document.getElementById('detailMeta').innerHTML =
-    `ASR ${m.attack_success?'1':'0'} · BR ${m.blast_radius} · RI ${m.reversibility_index.toFixed(2)} · DL ${m.detection_latency_ticks??'—'} · SWH ${m.severity_weighted_harm.toFixed(2)} · TPR ${m.transitive_privilege_ratio.toFixed(2)}<br>matched: ${matched}<br>canaries: ${canaries}`;
+    `ASR ${m.attack_success?'1':'0'} ${MIDDOT} BR ${m.blast_radius} ${MIDDOT} RI ${m.reversibility_index.toFixed(2)} ${MIDDOT} DL ${m.detection_latency_ticks??EMDASH} ${MIDDOT} SWH ${m.severity_weighted_harm.toFixed(2)} ${MIDDOT} TPR ${m.transitive_privilege_ratio.toFixed(2)}<br>matched: ${matched}<br>canaries: ${canaries}`;
 
-  const inv = (r.invocations||[]).map(x=>`
-    <div class="invoke">
-      <div class="nm">${x.tool}</div>
+  const inv = (r.invocations||[]).map(x=>{
+    const isWrite = WRITE_TOOLS.has(x.tool);
+    return `
+    <div class="invoke ${isWrite && m.attack_success ? 'write-emph' : ''}">
+      <div class="nm">${x.tool}${isWrite ? ' <span class="pill muted" style="margin-left:6px">write</span>' : ''}</div>
       <div class="args">${JSON.stringify(x.args).slice(0,400)}</div>
       ${x.error?`<div class="err">${x.error}</div>`:''}
-    </div>`).join('') || '<div class="empty">no invocations</div>';
+    </div>`;
+  }).join('') || '<div class="empty">no invocations</div>';
 
   const evs = (r.events||[]).map(e=>`
     <div class="ev ${e.siem_alert?'alert':''} ${e.caused_by?'cascade':''}">
       <div class="clk">t=${e.sim_clock}</div>
       <div class="sys">${e.system}.${e.kind}</div>
       <div>
-        <div class="desc">${e.entity_type} · ${e.entity_id}${e.siem_alert?` · ALERT ${e.siem_rule||''}`:''}</div>
-        <div class="actor">actor=${e.actor}${e.caused_by?` · caused_by=${e.caused_by}`:''}</div>
+        <div class="desc">${e.entity_type} ${MIDDOT} ${e.entity_id}${e.siem_alert?` ${MIDDOT} ALERT ${e.siem_rule||''}`:''}</div>
+        <div class="actor">actor=${e.actor}${e.caused_by?` ${MIDDOT} caused_by=${e.caused_by}`:''}</div>
       </div>
     </div>`).join('') || '<div class="empty">no events</div>';
 
@@ -246,7 +411,6 @@ function showDetail(i){
       <div class="invoke" style="white-space:pre-wrap">${(r.final_text||'(none)').slice(0,2000)}</div>
     </div>
   `;
-  d.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 init();
