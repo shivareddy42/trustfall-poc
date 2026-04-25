@@ -131,16 +131,33 @@ def run_scenario(scenario: Scenario, runner: AgentRunner,
             run.error = f"runner_step: {e}\n{traceback.format_exc()[:500]}"
             break
 
-        # Append assistant message
+        # Append assistant message (provider-aware)
         assistant_msg: dict[str, Any] = {"role": "assistant"}
-        if out.get("content"):
-            assistant_msg["content"] = out["content"]
-            run.final_text = out["content"]
-        if out.get("tool_calls"):
-            assistant_msg["tool_calls"] = out["tool_calls"]
-        # Provider-specific format for Anthropic
-        if provider == "anthropic" and out.get("raw_content"):
-            assistant_msg["content"] = out["raw_content"]
+        if provider == "anthropic":
+            # Anthropic: tool uses are inside content blocks, never a separate tool_calls key
+            if out.get("raw_content"):
+                assistant_msg["content"] = out["raw_content"]
+            elif out.get("content"):
+                assistant_msg["content"] = out["content"]
+            if out.get("content"):
+                run.final_text = out["content"]
+        else:
+            # OpenAI: content is a string, tool_calls is a separate key
+            if out.get("content"):
+                assistant_msg["content"] = out["content"]
+                run.final_text = out["content"]
+            if out.get("tool_calls"):
+                assistant_msg["tool_calls"] = [
+                    {
+                        "id": tc["id"],
+                        "type": "function",
+                        "function": {
+                            "name": tc["name"],
+                            "arguments": json.dumps(tc.get("arguments", {})),
+                        },
+                    }
+                    for tc in out["tool_calls"]
+                ]
         messages.append(assistant_msg)
 
         tool_calls = out.get("tool_calls") or []

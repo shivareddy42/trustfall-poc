@@ -9,7 +9,7 @@ from openai import OpenAI
 
 
 class OpenAIRunner:
-    def __init__(self, model: str = "gpt-5.3", temperature: float = 0.0,
+    def __init__(self, model: str = "gpt-5.4", temperature: float = 0.0,
                  api_key: str | None = None) -> None:
         self.name = model
         self.model = model
