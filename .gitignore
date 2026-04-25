@@ -12,3 +12,4 @@ venv/
 node_modules/
 dist/
 build/
+results/smoke_*.json
