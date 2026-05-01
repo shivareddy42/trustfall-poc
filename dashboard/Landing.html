@@ -159,7 +159,7 @@
     </a>
     <nav class="r-nav-links">
       <a class="active" href="Landing.html">Overview</a>
-      <a href="dashboard.html">Dashboard</a>
+      <a href="dashboard.html"><span class="r-nav-livedot"></span>Dashboard</a>
       <a href="scenarios.html">Scenarios</a>
       <a href="methodology.html">Methodology</a>
     </nav>
@@ -172,7 +172,7 @@
 <!-- ───────────────── header / abstract ───────────────── -->
 <section class="r-hero">
   <div class="r-hero-inner">
-    <div class="r-eyebrow"><span class="dot"></span><span>BENCHMARK · POC RESULTS · APRIL 2026</span></div>
+    <div class="r-eyebrow"><span class="dot"></span><span>BENCHMARK · POC RESULTS · APRIL 2026</span><span class="r-eyebrow-sep">·</span><span class="r-eyebrow-live"><span class="r-live-dot"></span>LIVE DASHBOARD INSIDE</span></div>
     <h1 class="r-title">TRUSTFALL: a benchmark for agent safety across <em>composed</em> enterprise systems.</h1>
     <p class="r-deck">An agent with five legitimate scopes can do something none of them authorize. We measure how often this happens — and which classes of failure survive frontier-grade safety tuning — across four production LLM agents on thirty adversarial scenarios spanning IT service management, procurement, and email.</p>
     <div class="r-byline">
@@ -182,6 +182,26 @@
       <span><span class="lbl">MODELS</span><span class="val">GPT-5.4 · Sonnet 4.6 · GPT-5.4-mini · Haiku 4.5</span></span>
       <span><span class="lbl">SPEND</span><span class="val">under $5 across 120 runs</span></span>
     </div>
+
+    <!-- ───── CTA strip — surfaces the interactive surfaces above the fold ───── -->
+    <div class="r-hero-cta">
+      <a class="r-cta-primary" href="dashboard.html">
+        <span class="r-cta-label">Open the dashboard</span>
+        <span class="r-cta-sub">interactive · 4 models · 30 scenarios · live traces</span>
+        <span class="r-cta-arrow">→</span>
+      </a>
+      <a class="r-cta-secondary" href="scenarios.html">
+        <span class="r-cta-label">Browse 30 scenarios</span>
+        <span class="r-cta-sub">scope graphs · attack matrix · per-scenario detail</span>
+        <span class="r-cta-arrow">→</span>
+      </a>
+      <a class="r-cta-secondary" href="methodology.html">
+        <span class="r-cta-label">Read methodology</span>
+        <span class="r-cta-sub">metrics · invariants · TPR worked example</span>
+        <span class="r-cta-arrow">→</span>
+      </a>
+    </div>
+    <div class="r-hero-cta-hint">↓ &nbsp;or keep scrolling for the full writeup</div>
   </div>
 </section>
 
