@@ -198,12 +198,12 @@ python -m harness.run --model claude-sonnet-4-6          --scenarios all --out r
 python -m harness.run --model claude-haiku-4-5-20251001  --scenarios all --out results/haiku45.json
 
 # View the results
-# Open dashboard/Landing.html in any browser, or run:
-cd dashboard && python -m http.server 8765
+# Open docs/Landing.html in any browser, or run:
+cd docs && python -m http.server 8765
 # → http://127.0.0.1:8765/Landing.html
 ```
 
-All four run JSONs are bundled into `dashboard/results-data.js` for the static site to display without a backend.
+All four run JSONs are bundled into `docs/results-data.js` for the static site to display without a backend.
 
 ---
 

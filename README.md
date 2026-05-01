@@ -38,7 +38,7 @@ TRUSTFALL measures what current benchmarks miss: agent safety *across* composed 
   - **T4 — Structured-Field Prompt Injection** (10 scenarios)
 - **Harness** — tool dispatch loop, scope enforcement, full metric suite (ASR, BR, RI, DL, SWH, TPR).
 - **Baseline runners** — OpenAI, Anthropic, and a deterministic MockRunner for offline testing.
-- **Static research site** under `dashboard/` — Landing page (paper-style abstract, contributions, threat-class breakdown, audited per-failure metrics), Dashboard (interactive multi-model comparison, event timelines, cascade trees), Scenarios library (all 30 with scope graphs and attack matrices), Methodology (metric formulas, harness invariants, TPR worked example).
+- **Static research site** under `docs/` — Landing page (paper-style abstract, contributions, threat-class breakdown, audited per-failure metrics), Dashboard (interactive multi-model comparison, event timelines, cascade trees), Scenarios library (all 30 with scope graphs and attack matrices), Methodology (metric formulas, harness invariants, TPR worked example).
 - **Smoke tests** — 4/4 passing, no API keys required.
 
 ## Quickstart
@@ -49,7 +49,7 @@ The site is plain static files (no server required):
 
 ```bash
 git clone https://github.com/shivareddy42/trustfall-poc
-cd trustfall-poc/dashboard
+cd trustfall-poc/docs
 # Open Landing.html in any browser — that's the homepage.
 # All cross-page nav, dashboard data, and methodology pages work as static files.
 ```
@@ -57,7 +57,7 @@ cd trustfall-poc/dashboard
 Or, if you want a local web server (some browsers restrict `file://` JS):
 
 ```bash
-cd trustfall-poc/dashboard
+cd trustfall-poc/docs
 python -m http.server 8765
 # → http://127.0.0.1:8765/Landing.html
 ```
@@ -83,7 +83,7 @@ python -m harness.run --model claude-sonnet-4-6         --scenarios all --out re
 python -m harness.run --model claude-haiku-4-5-20251001 --scenarios all --out results/haiku45.json
 ```
 
-All four run JSONs are bundled into `dashboard/results-data.js` for the static site to display without a backend.
+All four run JSONs are bundled into `docs/results-data.js` for the static site to display without a backend.
 
 ## Repository layout
 
@@ -92,7 +92,7 @@ corpsim/         simulated enterprise environment (ITSM, Ariba, email, event bus
 scenarios/       30 labeled adversarial scenarios across T1, T2, T4
 harness/         agent runner, metrics, CLI
 baselines/       OpenAI + Anthropic + MockRunner
-dashboard/       static research site (Landing, Dashboard, Scenarios, Methodology + bundled run data)
+docs/       static research site (Landing, Dashboard, Scenarios, Methodology + bundled run data)
 report/          preliminary findings writeup with frontier-model numbers
 tests/           offline smoke tests
 PRD.md           full research design (target: OpenAI Safety Fellowship)
