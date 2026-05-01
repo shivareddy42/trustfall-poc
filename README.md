@@ -2,7 +2,8 @@
 
 **A benchmark for evaluating LLM agent safety across composed enterprise system integrations.**
 
-Pre-application POC (April 2026). Full research design in [`PRD.md`](./PRD.md). Preliminary findings in [`report/findings.md`](./report/findings.md).
+Find the deployed link at: https://shivareddy42.github.io/trustfall-poc/Landing.html
+Full research design in [`PRD.md`](./PRD.md). Preliminary findings in [`report/findings.md`](./report/findings.md).
 
 ---
 
