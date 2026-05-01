@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TRUSTFALL — CorpSim architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { padding: 0; }
+  .frame {
+    width: 1280px; height: 820px;
+    padding: 56px 64px 52px;
+    background: var(--paper);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .frame::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(26,24,21,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26,24,21,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .header { position: relative; z-index: 2; }
+  .figref { font-family: 'Inter Tight'; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px; }
+  .figref b { color: var(--ink); font-weight: 600; }
+  h2 { font-family: 'Source Serif 4'; font-weight: 500; font-size: 40px; line-height: 1.1; letter-spacing: -0.02em; max-width: 880px; }
+  .sub { margin-top: 14px; font-family: 'Inter Tight'; font-size: 15px; color: var(--ink-2); max-width: 760px; line-height: 1.5; }
+  .sub em { font-style: italic; color: var(--accent); }
+
+  .canvas {
+    position: relative; z-index: 2;
+    margin-top: 36px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 32px;
+    align-items: stretch;
+    height: 380px;
+    margin-bottom: 32px;
+  }
+  .system {
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    padding: 20px 22px 22px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .system .tag { font-family: 'Inter Tight'; font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
+  .system h3 { font-family: 'Source Serif 4'; font-size: 26px; font-weight: 500; margin-top: 6px; letter-spacing: -0.01em; }
+  .system .endpoints { margin-top: 14px; font-family: 'JetBrains Mono'; font-size: 11.5px; line-height: 1.85; color: var(--ink-2); }
+  .system .endpoints span { display: block; }
+  .system .endpoints span.write { color: var(--ink); font-weight: 500; }
+  .system .endpoints span.write::before { content: "▸ "; color: var(--accent); }
+  .system .footer { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rule-soft); font-family: 'Inter Tight'; font-size: 11px; color: var(--ink-3); display: flex; justify-content: space-between; }
+  .system .footer b { color: var(--ink); font-weight: 600; }
+
+  /* shared infrastructure bar at bottom */
+  .infra {
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+  }
+  .pillar {
+    border: 1px solid var(--ink); padding: 12px 16px;
+    background: var(--ink); color: var(--paper);
+  }
+  .pillar.ghost { background: var(--paper); color: var(--ink); }
+  .pillar .k { font-family: 'Inter Tight'; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.7; }
+  .pillar .v { font-family: 'Source Serif 4'; font-size: 16px; margin-top: 4px; font-weight: 500; }
+  .pillar.ghost .k { opacity: 1; color: var(--ink-3); }
+
+  .legend { position: absolute; right: 64px; top: 56px; z-index: 3; font-family: 'Inter Tight'; font-size: 10.5px; color: var(--ink-3); display: flex; gap: 22px; align-items: center; letter-spacing: 0.06em; }
+  .legend .swatch { display: inline-block; width: 18px; height: 1.5px; background: var(--ink); vertical-align: middle; margin-right: 6px; }
+  .legend .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 6px; vertical-align: middle; }
+
+  /* connecting cascade arrow under systems */
+  .cascade-svg { position: absolute; left: 64px; right: 64px; top: 320px; height: 50px; pointer-events: none; z-index: 1; }
+</style>
+</head>
+<body>
+<div class="frame" id="frame">
+  <div class="header">
+    <div class="figref"><b>FIG 2</b> &nbsp;·&nbsp; CorpSim · 3 systems · 22 endpoints · shared state · event bus · SIEM</div>
+    <h2>One agent. Three OAuth scopes. A typed event bus that makes harm <em>observable, not approximated.</em></h2>
+    <p class="sub">Writes propagate via referential integrity. Cascade events carry <span class="mono" style="font-size: 13px;">caused_by</span> pointers — blast radius is exact BFS over the event DAG, not heuristic.</p>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot"></span>mutating write</span>
+    <span><span class="swatch"></span>cascades downstream</span>
+  </div>
+
+  <div class="canvas">
+    <div class="system">
+      <span class="tag">System 01 · ITSM</span>
+      <h3>ServiceNow-style ticketing</h3>
+      <div class="endpoints">
+        <span>itsm.list_incidents</span>
+        <span>itsm.get_incident</span>
+        <span>itsm.get_user</span>
+        <span class="write">itsm.create_incident</span>
+        <span class="write">itsm.update_incident</span>
+        <span class="write">itsm.assign</span>
+      </div>
+      <div class="footer"><span>6 endpoints</span><b>RBAC enforced</b></div>
+    </div>
+
+    <div class="system">
+      <span class="tag">System 02 · Procurement</span>
+      <h3>Ariba-style P2P</h3>
+      <div class="endpoints">
+        <span>ariba.get_supplier</span>
+        <span>ariba.list_pos</span>
+        <span>ariba.get_po</span>
+        <span class="write">ariba.update_supplier</span>
+        <span class="write">ariba.approve_po</span>
+        <span class="write">ariba.create_po</span>
+        <span class="write">ariba.cancel_po</span>
+      </div>
+      <div class="footer"><span>9 endpoints</span><b>approval chains</b></div>
+    </div>
+
+    <div class="system">
+      <span class="tag">System 03 · Email</span>
+      <h3>Inbox + outbound</h3>
+      <div class="endpoints">
+        <span>email.list_messages</span>
+        <span>email.get_message</span>
+        <span>email.search</span>
+        <span class="write">email.send</span>
+        <span class="write">email.reply</span>
+        <span class="write">email.forward</span>
+      </div>
+      <div class="footer"><span>7 endpoints</span><b>domain provenance</b></div>
+    </div>
+  </div>
+
+  <div class="infra">
+    <div class="pillar">
+      <div class="k">Shared state store</div>
+      <div class="v">Referential integrity across 3 systems</div>
+    </div>
+    <div class="pillar ghost">
+      <div class="k">Typed event bus</div>
+      <div class="v">Cascade DAG · caused_by pointers</div>
+    </div>
+    <div class="pillar ghost">
+      <div class="k">Default SIEM rule set</div>
+      <div class="v">Detection latency = ticks-to-fire</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

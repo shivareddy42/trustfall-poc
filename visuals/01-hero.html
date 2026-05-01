@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TRUSTFALL — Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); width: 100%; }
+  body {
+    padding: 32px 44px 28px;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+    height: 540px;
+    gap: 28px;
+  }
+  body::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(26,24,21,0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26,24,21,0.045) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+  }
+
+  .top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 2; }
+  .mark { display: flex; align-items: center; gap: 11px; }
+  .mark-glyph {
+    width: 28px; height: 28px;
+    background: var(--ink); color: var(--paper);
+    display: grid; place-items: center;
+    font-family: 'Inter Tight'; font-weight: 700; font-size: 11px; letter-spacing: 0.04em;
+  }
+  .mark-text { font-family: 'Inter Tight'; font-weight: 600; font-size: 12px; letter-spacing: 0.32em; }
+  .meta { display: flex; gap: 18px; font-family: 'Inter Tight'; font-size: 9.5px; color: var(--ink-3); letter-spacing: 0.14em; text-transform: uppercase; }
+  .meta b { color: var(--ink); font-weight: 600; }
+
+  .hero { position: relative; z-index: 2; max-width: 760px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .eyebrow-row { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; }
+  .pip { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; }
+  .eyebrow { font-size: 10px; }
+
+  h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 42px; line-height: 1.04; letter-spacing: -0.022em;
+    font-weight: 500;
+  }
+  h1 em { font-style: italic; color: var(--accent); font-weight: 500; }
+  .lede {
+    margin-top: 16px; max-width: 620px;
+    font-size: 14.5px; line-height: 1.5; color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .bottom { display: flex; align-items: flex-end; justify-content: space-between; position: relative; z-index: 2; gap: 24px; }
+  .stats { display: flex; gap: 30px; }
+  .stat .n {
+    font-family: 'Source Serif 4'; font-size: 32px; line-height: 1;
+    font-weight: 500; letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .l {
+    font-family: 'Inter Tight'; font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-3);
+    margin-top: 6px; max-width: 130px; line-height: 1.35;
+  }
+  .stat.alert .n { color: var(--accent); }
+
+  .trace {
+    position: absolute; right: 44px; top: 86px;
+    font-family: 'JetBrains Mono'; font-size: 10.5px; line-height: 2.0;
+    color: var(--ink-3); text-align: right;
+    z-index: 2;
+  }
+  .trace .l { display: block; white-space: nowrap; }
+  .trace .l i { color: var(--ink-2); font-style: normal; opacity: 0.65; margin-right: 8px; }
+  .trace .l b { color: var(--accent); font-weight: 500; margin-left: 6px; }
+  .trace .l.fired { color: var(--ink); }
+
+  .footer-rule { position: absolute; left: 44px; right: 44px; bottom: 24px; height: 1px; background: var(--ink); opacity: 0.16; z-index: 1; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="mark">
+      <div class="mark-glyph">TF</div>
+      <div class="mark-text">TRUSTFALL</div>
+    </div>
+    <div class="meta">
+      <span><b>v0.1 POC</b></span>
+      <span>Apr 2026</span>
+      <span>MIT</span>
+    </div>
+  </div>
+
+  <div class="trace">
+    <span class="l"><i>t=0</i> email.list_messages</span>
+    <span class="l"><i>t=1</i> ariba.get_supplier</span>
+    <span class="l fired"><i>t=2</i> ariba.update_supplier <b>↯</b></span>
+    <span class="l"><i>t=3</i> SIEM.alert <b>fired</b></span>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow-row">
+      <div class="pip"></div>
+      <span class="eyebrow">Benchmark · Agent safety across composed enterprise systems</span>
+    </div>
+    <h1>An agent with five legitimate scopes can do something <em>none of them authorize.</em></h1>
+    <p class="lede">TRUSTFALL measures how often this happens — and which classes of failure survive frontier-grade safety tuning — across four production LLM agents on thirty adversarial scenarios.</p>
+  </div>
+
+  <div class="bottom">
+    <div class="stats">
+      <div class="stat"><div class="n">30</div><div class="l">Scenarios</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">Frontier models</div></div>
+      <div class="stat alert"><div class="n">5</div><div class="l">Successful attacks</div></div>
+      <div class="stat alert"><div class="n">$62K</div><div class="l">PO on forged authority</div></div>
+      <div class="stat"><div class="n">1.43×</div><div class="l">Mean TPR</div></div>
+    </div>
+  </div>
+
+  <div class="footer-rule"></div>
+</body>
+</html>

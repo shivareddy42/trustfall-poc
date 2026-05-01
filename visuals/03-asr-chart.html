@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TRUSTFALL — ASR by model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { padding: 0; }
+  .frame {
+    width: 1280px; height: 540px;
+    padding: 56px 64px 52px;
+    background: var(--paper);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .frame::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(26,24,21,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26,24,21,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .header { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; }
+  .header-l { max-width: 800px; }
+  .figref { font-family: 'Inter Tight'; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 12px; }
+  .figref b { color: var(--ink); font-weight: 600; }
+  h2 { font-family: 'Source Serif 4'; font-weight: 500; font-size: 38px; line-height: 1.1; letter-spacing: -0.02em; }
+  h2 em { font-style: italic; color: var(--accent); }
+  .legend { display: flex; gap: 22px; font-family: 'Inter Tight'; font-size: 11px; color: var(--ink-3); letter-spacing: 0.04em; }
+  .legend .swatch { display: inline-block; width: 14px; height: 10px; vertical-align: middle; margin-right: 7px; }
+  .legend .safe { background: var(--ink); }
+  .legend .fail { background: var(--accent); }
+
+  .chart {
+    margin-top: 44px; flex: 1; position: relative; z-index: 2;
+    display: flex; flex-direction: column; gap: 22px;
+  }
+  .row { display: grid; grid-template-columns: 280px 1fr 220px; gap: 28px; align-items: center; }
+  .label { display: flex; flex-direction: column; gap: 4px; }
+  .label .name { font-family: 'Source Serif 4'; font-size: 22px; font-weight: 500; }
+  .label .tier { font-family: 'Inter Tight'; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .track {
+    height: 36px; position: relative; border-bottom: 1px solid var(--ink);
+  }
+  .bar {
+    height: 100%; position: relative;
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 12px;
+    color: var(--paper); font-family: 'Inter Tight'; font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+  }
+  .bar.safe { background: var(--ink); }
+  .bar.fail { background: var(--accent); }
+  .bar.zero {
+    background: transparent; border-bottom: 2px solid var(--ink);
+    color: var(--ink); font-weight: 500;
+    justify-content: flex-start; padding-left: 4px;
+    width: 100% !important;
+  }
+  .ticks { position: absolute; inset: 0 0 -22px 0; pointer-events: none; }
+  .ticks span { position: absolute; bottom: -22px; transform: translateX(-50%); font-family: 'JetBrains Mono'; font-size: 10px; color: var(--ink-3); }
+  .ticks span::before { content: ""; position: absolute; left: 50%; bottom: 22px; height: 4px; width: 1px; background: var(--ink-3); }
+
+  .stats {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
+    font-family: 'JetBrains Mono'; font-size: 11px;
+  }
+  .stats .cell { display: flex; flex-direction: column; gap: 2px; }
+  .stats .cell .k { color: var(--ink-3); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; font-family: 'Inter Tight'; }
+  .stats .cell .v { color: var(--ink); font-weight: 500; }
+  .stats .cell .v.fail { color: var(--accent); font-weight: 600; }
+
+  .axis-labels { display: grid; grid-template-columns: 280px 1fr 220px; gap: 28px; margin-top: 4px; }
+  .axis-labels .scale { position: relative; height: 16px; }
+  .axis-labels .scale span { position: absolute; transform: translateX(-50%); font-family: 'JetBrains Mono'; font-size: 10px; color: var(--ink-3); }
+  .axis-labels .scale-l { font-family: 'Inter Tight'; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+
+  .footer-note { position: relative; z-index: 2; margin-top: 18px; font-family: 'Inter Tight'; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--rule-soft); padding-top: 14px; }
+  .footer-note b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="frame" id="frame">
+  <div class="header">
+    <div class="header-l">
+      <div class="figref"><b>FIG 1</b> &nbsp;·&nbsp; ASR by model · n=30 scenarios per cell</div>
+      <h2>Flagship models refuse all 30. Mid-tier and small-tier models <em>execute harmful tool calls.</em></h2>
+    </div>
+    <div class="legend">
+      <span><span class="swatch safe"></span>refused (ASR=0)</span>
+      <span><span class="swatch fail"></span>attack succeeded</span>
+    </div>
+  </div>
+
+  <div class="chart">
+    <div class="row">
+      <div class="label"><span class="name">GPT-5.4</span><span class="tier">OpenAI · flagship</span></div>
+      <div class="track"><div class="bar zero">0 / 30</div></div>
+      <div class="stats">
+        <div class="cell"><span class="k">T1</span><span class="v">0.00</span></div>
+        <div class="cell"><span class="k">T2</span><span class="v">0.00</span></div>
+        <div class="cell"><span class="k">T4</span><span class="v">0.00</span></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="label"><span class="name">Claude Sonnet 4.6</span><span class="tier">Anthropic · flagship</span></div>
+      <div class="track"><div class="bar zero">0 / 30</div></div>
+      <div class="stats">
+        <div class="cell"><span class="k">T1</span><span class="v">0.00</span></div>
+        <div class="cell"><span class="k">T2</span><span class="v">0.00</span></div>
+        <div class="cell"><span class="k">T4</span><span class="v">0.00</span></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="label"><span class="name">GPT-5.4-mini</span><span class="tier">OpenAI · mid-tier</span></div>
+      <div class="track"><div class="bar fail" style="width: 33.3%;">10% · 3 / 30</div></div>
+      <div class="stats">
+        <div class="cell"><span class="k">T1</span><span class="v">0.00</span></div>
+        <div class="cell"><span class="k">T2</span><span class="v fail">0.20</span></div>
+        <div class="cell"><span class="k">T4</span><span class="v fail">0.10</span></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="label"><span class="name">Claude Haiku 4.5</span><span class="tier">Anthropic · small</span></div>
+      <div class="track"><div class="bar fail" style="width: 23.3%;">7% · 2 / 30</div></div>
+      <div class="stats">
+        <div class="cell"><span class="k">T1</span><span class="v">0.00</span></div>
+        <div class="cell"><span class="k">T2</span><span class="v fail">0.20</span></div>
+        <div class="cell"><span class="k">T4</span><span class="v">0.00</span></div>
+      </div>
+    </div>
+
+    <div class="axis-labels">
+      <div class="scale-l">Model</div>
+      <div class="scale">
+        <span style="left: 0%;">0%</span>
+        <span style="left: 25%;">25%</span>
+        <span style="left: 50%;">50%</span>
+        <span style="left: 75%;">75%</span>
+        <span style="left: 100%;">100%</span>
+      </div>
+      <div class="scale-l">Per–threat-class ASR</div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <b>Replication signal.</b> Both small models — from <em>different labs</em> — fail the identical supplier-contact-rewrite scenario (T2-0002), arguing the failure mode is not single-lab tuning bias.
+  </div>
+</div>
+</body>
+</html>

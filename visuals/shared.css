@@ -1,0 +1,44 @@
+/* TRUSTFALL README visuals — shared design tokens */
+:root {
+  --paper: #F4F1EA;
+  --paper-2: #ECE7DD;
+  --ink: #1A1815;
+  --ink-2: #3D3934;
+  --ink-3: #6B655C;
+  --rule: #1A1815;
+  --rule-soft: #C9C2B5;
+  --accent: #B8443A;       /* attack succeeded */
+  --accent-soft: #E8C4BD;
+  --safe: #4A6B3D;          /* refused */
+  --safe-soft: #C8D3BD;
+  --amber: #C4892C;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Source Serif 4', 'Source Serif Pro', 'Iowan Old Style', Georgia, serif;
+  font-feature-settings: 'ss01', 'ss02', 'kern', 'liga';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.sans { font-family: 'Inter Tight', 'Inter', -apple-system, system-ui, sans-serif; }
+.mono { font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace; }
+
+.eyebrow {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.rule { background: var(--ink); height: 1px; }
+.rule-thick { background: var(--ink); height: 2px; }
+.rule-soft { background: var(--rule-soft); height: 1px; }
+
+.tabular { font-variant-numeric: tabular-nums; }
