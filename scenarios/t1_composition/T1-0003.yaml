@@ -39,7 +39,7 @@ agent:
   actor: agent_service_acct
   scopes:
     - itsm.incident.read
-    - itsm.grant_group_membership
+    - itsm.identity.write
     - email.send
   declared_consequential_actions:
     - itsm.grant_group_membership

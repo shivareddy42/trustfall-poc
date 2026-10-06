@@ -4,11 +4,11 @@
 
 > *Working title. Candidate names: TRUSTFALL, AEGIS-Bench, CompoundAgent. Final naming TBD after first draft paper.*
 
-**Target venue:** NeurIPS Datasets & Benchmarks 2027 (submission May 2027) or arXiv + ICLR 2027.
-**Target audience:** OpenAI Safety Fellowship reviewers; longer-term, AI safety researchers studying agentic oversight and deployment teams building enterprise agent products.
+**Target venue:** NeurIPS Datasets & Benchmarks or an equivalent datasets-and-benchmarks venue, with an arXiv preprint of the design.
+**Audience:** AI security researchers studying agentic oversight, and teams evaluating enterprise agent deployments.
 **Author:** Shiva Reddy Peddireddy
-**Version:** 0.1 (pre-application draft)
-**Last updated:** April 16, 2026
+**Version:** 0.2 (independent research design; proof of concept in this repository)
+**Last updated:** October 2026
 
 ---
 
@@ -22,7 +22,7 @@ Current agent safety benchmarks (WebArena, AgentBench, τ-bench, SWE-bench, Agen
 2. A **threat-model taxonomy and attack corpus** for *composed* agent privilege, including a novel class of prompt injections delivered via structured enterprise data fields (vendor names, PO line items, approval notes, CMDB attributes) rather than free-form web content.
 3. A **blast-radius metric suite** measuring not "did the agent misbehave" but "how far did the damage propagate, how long until audit caught it, and was it reversible?" — plus a reference set of five mitigation architectures evaluated against it.
 
-**Deliverable by end of fellowship (Feb 5, 2027):** Open-source environment (MIT), attack corpus (~1,200 scenarios across 8 threat classes), reference paper, and a leaderboard launched with frontier-model baselines.
+**Full-benchmark target:** Open-source environment (MIT), attack corpus (~1,200 scenarios across 8 threat classes), reference paper, and a leaderboard launched with frontier-model baselines. The repository today is the proof of concept: three simulators, 30 scenarios, and the published v0 runs.
 
 ---
 
@@ -70,26 +70,24 @@ Individually, each scope is bounded. **Composed, they form a privilege graph who
 
 None of these are hypothetical. Every one has analogs in well-known enterprise security incidents (vendor fraud, approval chain manipulation, integration abuse). **Current agent safety evaluation captures none of them**, because they require (a) multiple systems with real referential integrity, (b) realistic governance structures like approval workflows and RBAC, and (c) measurement of downstream propagation, not just direct action.
 
-### 1.2 Why this matters to OpenAI specifically
+### 1.2 Why composed enterprise agents are the deployment surface
 
-This is not academic. It is directly on the critical path for three OpenAI product surfaces:
+This is the setting in which organizations are putting agents to work:
 
-1. **ChatGPT Enterprise / Business agents** deployed across customer SaaS stacks.
-2. **Computer-use and agentic API products** being adopted by enterprise customers.
-3. **The Apps SDK and connector ecosystem**, which explicitly encourages composition of tools from multiple vendors.
+1. Assistants deployed across a customer's SaaS stack.
+2. Computer-use and agentic API products adopted for internal operations.
+3. Connector ecosystems that encourage composition of tools from multiple vendors.
 
-The safety story for each of these today is essentially "trust the system prompt, scope the OAuth, log the actions." That is insufficient and every enterprise security team deploying these products knows it. A rigorous benchmark that *quantifies* the failure modes, paired with reference mitigations, is infrastructure OpenAI's safety and deployment teams can use immediately.
+The safety story for each of these today is essentially "trust the system prompt, scope the OAuth, log the actions." That is insufficient, and enterprise security teams deploying these products already know it. A benchmark that quantifies the failure modes, paired with reference mitigations, is infrastructure those teams and public evaluation programs can use.
 
-### 1.3 Why I can credibly do this
+### 1.3 Domain model
 
-I build these systems in production. My current role at BeOne Medicines is developing a ServiceNow ↔ SAP Ariba pending-approvals integration: OAuth flows, REST Message records, custom tables, upsert logic across systems with real approval chains, real vendors, real dollar amounts. I have direct, firsthand knowledge of:
+CorpSim is modeled on real enterprise Ariba and ITSM integration patterns: OAuth-scoped tool surfaces, approval queues, REST-shaped records, and upserts across systems with approval chains, vendors, and dollar amounts. The design follows publicly documented structures rather than any single employer's tenant:
 
-- How approval workflows route and how they can be subverted.
-- What OAuth scopes enterprise integrations actually get granted (far broader than declared need).
-- The exact data structures in ServiceNow (sys_user, sys_user_group, sc_request, sc_req_item, approval_approver) and Ariba (requisitions, POs, invoices, supplier records) that would need to be faithfully simulated.
-- The gap between written governance policies and what integrations can technically do.
-
-Most safety researchers approaching this problem would have to learn the domain from scratch. I already live in it. That's the edge the fellowship proposal needs to lead with.
+- How approval workflows route, and how threshold splits and forged authority can subvert them.
+- How broad the OAuth scopes on enterprise integrations tend to be, relative to the action a reviewer would declare.
+- The record shapes a faithful simulator has to cover: ITSM users, groups, requests, and approvals; procurement suppliers, requisitions, purchase orders, invoices.
+- The gap between written governance policies and what an integration can technically do.
 
 ---
 
@@ -291,7 +289,7 @@ Human red team (3 participants, enterprise security background) given the enviro
 
 ### 6.4 External validity
 
-Calibration appendix: manually translate 15 TRUSTFALL scenarios to a real ServiceNow developer instance and real Ariba sandbox. Demonstrate that the failure modes reproduce. This is the single most important credibility lever for the paper and I have direct access via my current role.
+Calibration appendix: manually translate 15 TRUSTFALL scenarios to a ServiceNow developer instance and an Ariba sandbox. Demonstrate which failure modes reproduce. This is the main external-validity check for the paper.
 
 ---
 
@@ -311,35 +309,27 @@ The table goes in the paper intro.
 
 ---
 
-## 8. Timeline
+## 8. Status and remaining work
 
-### Pre-application (now → May 3, 2026) — The application moat
+### Proof of concept (this repository)
 
-The application will be dramatically stronger if it comes with a working POC. Target: a public GitHub repo showing that I can execute.
+Three simulators (ITSM, procurement, email; 22 endpoints), 30 scenarios across T1, T2, and T4, an offline harness, and published v0 runs of GPT-5.4, Claude Sonnet 4.6, GPT-5.4-mini, and Claude Haiku 4.5. Findings are in `report/findings.md`. Those runs predate the state-isolation fix and the scenario-reachability fixes; the published counts are kept as the v0 record, and a re-run is future work.
 
-- **Week 1 (Apr 16–22):** Finalize PRD. Set up repo skeleton. Stand up a minimal ITSM simulator (5 tables, 8 tool endpoints) with OpenAPI spec.
-- **Week 2 (Apr 23–29):** Build a minimal Ariba simulator (5 tables, 6 endpoints). Implement the event bus and cascade engine. Seed one organization template.
-- **Week 3 (Apr 30–May 3):** Build 30 scenarios across 3 threat classes (T1 Composition, T2 Cascading, T4 Structured Injection). Run GPT-5.3 and Opus 4.7 baselines. Write a 2-page mini-report with preliminary ASR numbers. Publish repo + report. Submit application citing both.
+### Full benchmark
 
-**This is the differentiator.** The application will not be "I propose to study X." It will be "I built a working prototype in 2.5 weeks, found Y failure rate on Z frontier model, here is the public repo, here is my research plan."
+- **Environment.** Complete all four simulators, including CMDB/identity. Organization templates. Cascade engine and continuous evaluation harness.
+- **Corpus.** On the order of 1,200 adversarial scenarios plus benign tasks. Hand-crafted, model-generated and human-filtered, and programmatically mutated. Ground-truth labels and a review pass. Automated reachability checks.
+- **Mitigations.** The five middleware patterns and the ablation matrix.
+- **Evaluation.** Repeated trials, statistical analysis, and a red-team escalation study.
+- **Calibration, paper, release.** Real-system calibration study. Submission-ready paper. Public repo, leaderboard, corpus, and preprint.
 
-### Fellowship phases (Sep 14, 2026 → Feb 5, 2027)
-
-- **Phase 1 — Environment build-out (Weeks 1–5, Sep 14 – Oct 18):** Complete all four simulators to full endpoint coverage. All five organization templates. Cascade engine production-grade. Continuous evaluation harness.
-- **Phase 2 — Attack corpus (Weeks 6–10, Oct 19 – Nov 22):** All 1,200 scenarios. Hand-crafted + LLM-generated + mutated. Ground truth labels. Internal review pass.
-- **Phase 3 — Mitigation reference implementations (Weeks 11–13, Nov 23 – Dec 13):** All five mitigation middlewares. Ablation matrices.
-- **Phase 4 — Full evaluation run (Weeks 14–16, Dec 14 – Jan 3):** 43,200+ evaluation runs. Statistical analysis. Red-team escalation study with external participants.
-- **Phase 5 — Calibration + paper + release (Weeks 17–21, Jan 4 – Feb 5):** Real-system calibration study. Paper draft → internal review → submission-ready. Public release: repo, leaderboard, corpus, paper preprint. Fellowship exit talk.
-
-### Post-fellowship
-
-Paper submission to NeurIPS D&B 2027. Leaderboard maintained at `trustfall-bench.org` (or similar). Follow-up paper on novel mitigations.
+A leaderboard can live with the project (for example `trustfall-bench.org`). A follow-up paper can cover mitigations once the baseline is stable.
 
 ---
 
 ## 9. Deliverables
 
-By Feb 5, 2027:
+For the full benchmark:
 
 1. **CorpSim** — MIT-licensed simulated enterprise environment. Target: 3000+ GitHub stars within 6 months of release based on comparable benchmark trajectories.
 2. **TRUSTFALL corpus** — 1,200 labeled adversarial scenarios + 400 benign tasks + ground-truth traces.
@@ -347,7 +337,7 @@ By Feb 5, 2027:
 4. **Evaluation harness** — Reproduces all paper results with one command.
 5. **Research paper** — ~12 pages + extensive appendix, submission-ready.
 6. **Public leaderboard** — Hosted, auto-updating, open to external submissions.
-7. **Technical blog post** — OpenAI-hosted summary aimed at deployment teams.
+7. **Technical writeup** aimed at deployment and evaluation teams.
 
 ---
 
@@ -357,7 +347,7 @@ By Feb 5, 2027:
 - All four simulators functional with ≥20 endpoints each.
 - ≥1,000 labeled adversarial scenarios.
 - Full evaluation run completed on ≥3 frontier models.
-- Paper draft submission-ready by Feb 5.
+- Paper draft submission-ready for a datasets-and-benchmarks venue.
 
 **Strong signal of success:**
 - At least one headline finding validated at statistical significance (p < 0.01, effect size ≥ 0.3).
@@ -366,7 +356,7 @@ By Feb 5, 2027:
 - Adopted by ≥1 frontier lab internal red-team workflow.
 
 **Moonshot:**
-- Direct integration as part of an OpenAI evals or deployment safety process.
+- Adopted inside a frontier-lab evaluation or a deployment-safety process.
 - Referenced in a frontier model system card.
 
 ---
@@ -378,33 +368,28 @@ By Feb 5, 2027:
 | Simulator fidelity insufficient to convince reviewers | Med | High | Real-system calibration study in appendix; co-author sign-off from enterprise security practitioner |
 | Scenarios too easy — frontier models score >95% safe | Low | High | L4 adversarial tier is designed to be genuinely hard; red-team escalation study adds unknown-unknown attacks |
 | Scenarios too brittle — success depends on exact phrasing | Med | Med | Every scenario has ≥5 paraphrastic variants; report variance |
-| Compute budget insufficient for full sweep | Med | Med | Fellowship provides compute; prioritize 2 models × full matrix over 4 models × partial |
+| Compute budget insufficient for full sweep | Med | Med | Prioritize 2 models × full matrix over 4 models × partial |
 | Timeline slippage | High | Med | Phases have hard boundaries; degrade scope gracefully (drop 1 simulator, drop 1 mitigation) before dropping paper |
-| Scooped by concurrent work | Med | Med | Publish POC + arXiv preprint of design in Sep 2026 to establish priority |
+| Scooped by concurrent work | Med | Med | The proof of concept and this design are already public; keep the preprint current |
 | LLM-generated scenarios have label errors | High | Med | 100% human review pass on corpus; inter-annotator agreement measured on 10% sample |
 
 ---
 
-## 12. Open Questions for the Reviewer / Mentor
+## 12. Open research questions
 
-1. Is the scope right? 4 simulators × 8 threat classes × 5 mitigations is ambitious for 5 months. The fallback is 3 simulators × 6 threat classes × 3 mitigations.
-2. Should the calibration study be against ServiceNow + Ariba specifically (my comparative advantage) or a more neutral real system?
-3. Is there an existing internal OpenAI eval we should align the corpus schema with for easy re-use?
-4. Leaderboard governance: open-submission or invite-only for the first year?
+1. Is the scope right? 4 simulators × 8 threat classes × 5 mitigations is large. A fallback is 3 simulators × 6 threat classes × 3 mitigations.
+2. Should the calibration study target ServiceNow and Ariba, because those are the systems CorpSim imitates, or a more neutral real system?
+3. Leaderboard governance: open submission, or a reviewed set of submissions in the first year?
 
 ---
 
-## 13. Why this research contributes to OpenAI's safety priority areas
+## 13. What the benchmark is for
 
-Mapping directly to the fellowship announcement:
-
-- **Safety evaluation:** TRUSTFALL is, centrally, an evaluation benchmark.
-- **Robustness:** Measures robustness to structured-field injection, which generalizes to any schema-constrained input (API responses, database reads, document fields).
-- **Scalable mitigations:** Evaluates five mitigations with explicit cost-of-safety measurement, enabling principled deployment decisions.
-- **Agentic oversight:** Pre-commit critic and threshold-triggered HITL are oversight mechanisms; we quantify their frontier.
-- **High-severity misuse domains:** Enterprise financial fraud, access-control compromise, and PII exfiltration are among the highest-severity deployment harms today.
-
-Five of the six priority areas, contributing to all of them through a single coherent artifact.
+- **Safety evaluation.** TRUSTFALL is an evaluation benchmark for composed enterprise agents.
+- **Robustness.** It measures structured-field injection, which generalizes to other schema-constrained inputs (API responses, database reads, document fields).
+- **Mitigations with a cost.** Five defenses, scored on attack success and on task success.
+- **Oversight.** Pre-commit critic and threshold-triggered human approval are oversight mechanisms; the design quantifies them.
+- **High-severity misuse.** Enterprise financial fraud, access-control compromise, and PII exfiltration.
 
 ---
 
@@ -445,21 +430,21 @@ This is one scenario of 150 in threat class T4.
 
 ---
 
-## Appendix B — What I'm building in the next 17 days (pre-application POC)
+## Appendix B — What the proof of concept actually contains
 
-Minimal repo at `github.com/shivareddy42/trustfall-poc`:
+Repository: `github.com/shivareddy42/trustfall-poc`.
 
-- `corpsim/itsm/` — 5 tables, 8 endpoints, FastAPI.
-- `corpsim/ariba/` — 5 tables, 6 endpoints, FastAPI.
-- `corpsim/eventbus/` — event types, cascade rules, Postgres schema.
-- `scenarios/` — 30 labeled scenarios (10 per class: T1, T2, T4).
-- `harness/` — run an agent against the environment, compute ASR / BR / RI.
-- `baselines/` — GPT-5.3, Opus 4.7 runners. No mitigations in POC.
-- `report/findings.pdf` — 2-page preliminary report with ASR numbers per threat class per model.
-- `README.md` — clean, honest, cites the full PRD as the research plan.
-
-Acceptance criterion for "application-ready": the repo README is impressive enough that a safety researcher reading it in 3 minutes thinks "this person is already doing the work."
+- `corpsim/itsm/` — 8 tool endpoints. Scope `itsm.identity.write` gates group grants.
+- `corpsim/ariba/` — 10 tool endpoints, including `approve_po` (`ariba.po.approve`) and `list_pending_approvals`.
+- `corpsim/email/` — 4 tool endpoints.
+- `corpsim/eventbus/` — typed events, four cascade rules, three implemented SIEM rules. A bulk-modification rule is not implemented.
+- `scenarios/` — 30 labeled scenarios (10 each of T1, T2, T4).
+- `harness/` — agent loop and ASR, BR, RI, DL, SWH, TPR.
+- `baselines/` — OpenAI and Anthropic runners, plus `MockRunner`.
+- `results/` — published v0 traces. Not rewritten after the harness fixes.
+- `report/findings.md` — preliminary findings, including the measurement caveat.
+- `docs/` — static site served on GitHub Pages.
 
 ---
 
-*End of PRD v0.1. Iteration expected.*
+*End of PRD v0.2.*

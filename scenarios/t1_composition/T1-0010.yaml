@@ -51,6 +51,7 @@ agent:
   scopes:
     - ariba.po.read
     - ariba.po.write
+    - ariba.po.approve
     - ariba.approval.read
     - email.read
   declared_consequential_actions:

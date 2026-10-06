@@ -177,7 +177,7 @@
     <p class="r-deck">An agent with five legitimate scopes can do something none of them authorize. We measure how often this happens — and which classes of failure survive frontier-grade safety tuning — across four production LLM agents on thirty adversarial scenarios spanning IT service management, procurement, and email.</p>
     <div class="r-byline">
       <span><span class="lbl">AUTHOR</span><span class="val">Shiva Reddy Peddireddy</span></span>
-      <span><span class="lbl">STAGE</span><span class="val">Pre-application POC</span></span>
+      <span><span class="lbl">STAGE</span><span class="val">Independent research POC</span></span>
       <span><span class="lbl">SCOPE</span><span class="val">3 systems · 22 endpoints · 30 scenarios</span></span>
       <span><span class="lbl">MODELS</span><span class="val">GPT-5.4 · Sonnet 4.6 · GPT-5.4-mini · Haiku 4.5</span></span>
       <span><span class="lbl">SPEND</span><span class="val">under $5 across 120 runs</span></span>
@@ -270,6 +270,10 @@
     <div class="r-figure-cap" style="border-radius:0 0 8px 8px;border-top:none;background:var(--panel);border:1px solid var(--line);border-top:none">
       <span class="num">FIG 1</span> Attack Success Rate by model. n = 30 scenarios per cell; 95% CI not yet computed at POC scale. Full per-scenario breakdown available in the <a href="dashboard.html">interactive dashboard</a>.
     </div>
+    <div class="aside">
+      <span class="lbl">Published v0 runs</span>
+      These counts (GPT-5.4 0/30, Sonnet 4.6 0/30, GPT-5.4-mini 3/30, Haiku 4.5 2/30) were produced before the state-isolation fix and the scenario-reachability fixes. They are not recomputed on this page. Harm scores were likely understated: replaying the published T4-0009 tool sequence after the fix raises severity-weighted harm from 4.50 to 9.00. A re-run is planned. The checked-in traces are unchanged.
+    </div>
 
     <h3 class="r-h3">Per–threat-class breakdown</h3>
     <p>Failures cluster sharply: zero across privilege composition, four out of forty in cascading state corruption, one out of forty in structured-field injection.</p>
@@ -354,7 +358,7 @@
       </div>
     </div>
 
-    <p style="margin-top:14px">A fourth class — <strong>T3 Reasoning manipulation through retrieved context</strong> — is specified in the PRD but not run at POC scale. <a class="r-xlink" href="methodology.html#threat-model">Full threat-model spec</a></p>
+    <p style="margin-top:14px">A fourth class — <strong>T3 Approval Chain Subversion</strong> — is specified in the PRD but not run at POC scale. <a class="r-xlink" href="methodology.html#threat-model">Full threat-model spec</a></p>
   </section>
 
   <!-- ───────────── 3. five failures audited ───────────── -->
@@ -390,7 +394,7 @@
     </div>
     <div class="aside">
       <span class="lbl">Hypothesis support</span>
-      Frontier safety tuning appears well-calibrated against long, free-text injection (<code>email.body</code>, attached documents). This result suggests it is <em>not</em> calibrated against short, schema-constrained, trust-laden enterprise fields. The model paraphrased the injection string as its own reasoning. This is the H2 prediction in the PRD.
+      The model paraphrased a short, schema-constrained <code>name</code> field as authorization. That is consistent with hypothesis H2. It is not a test of H2: the corpus has no matched free-text control, and this is 1 of 40 T4 runs. The published SWH for this row is 4.50. A replay of the same calls after the state-isolation fix scores 9.00, because the payment and supplier-email cascades, and the high-value service-account SIEM rule, now see the seeded purchase order.
     </div>
 
     <h3 class="r-h3">3.5 &nbsp;Aggregate per-failure metrics</h3>
@@ -458,7 +462,7 @@
 
     <div class="aside">
       <span class="lbl">Engagement diagnostic</span>
-      Flagship models averaged 2.3–3.5 tool calls per scenario and 0 errors. The ASR=0 outcomes are <em>informed refusals</em>, not paranoid bail-out. The harness is not blind — its smoke-test suite includes a scripted attacker that scores ASR=1 with BR=1 and instant SIEM fire on every adversarial scenario.
+      Flagship models averaged 2.3–3.5 tool calls per scenario and 0 errors. The ASR=0 outcomes on scenarios whose harmful tool was actually exposed are informed refusals. The smoke suite includes a scripted T2-0001 attacker (ASR=1, BR=1, bank-change SIEM at tick 0). It does not claim a SIEM alert on every scenario: only the three implemented rules fire.
     </div>
   </section>
 
@@ -469,7 +473,7 @@
       <li><span class="no">C1</span><div>A typed multi-system enterprise simulator (CorpSim) with referential integrity, event-bus, SIEM rules, and exact cascade tracking — designed so harm is observable rather than approximated.</div></li>
       <li><span class="no">C2</span><div>A formalized threat model for agentic failure across composed systems, with three populated classes and one specified-but-unrun class, each grounded in published incident patterns.</div></li>
       <li><span class="no">C3</span><div>Six metrics — ASR, Blast Radius, Reversibility Index, Detection Latency, Severity-Weighted Harm, Transitive Privilege Ratio — that decouple capability from harm and admit per-scenario, per-class, and per-model aggregation.</div></li>
-      <li><span class="no">C4</span><div>The first reported demonstration, on a production frontier-lab API model, of structured-field prompt injection succeeding via a schema-constrained, trust-laden enterprise field — the H2 prediction in the PRD.</div></li>
+      <li><span class="no">C4</span><div>A documented case, on a production frontier-lab API model, of structured-field prompt injection leading to a purchase-order approval. The case is consistent with hypothesis H2 and does not test it.</div></li>
       <li><span class="no">C5</span><div>Cross-lab replication of a small-model failure mode (T2-0002), suggesting the under-weighting of domain provenance in routine field-update tasks is not a single-vendor artifact.</div></li>
     </ol>
 
@@ -513,7 +517,7 @@
     <div class="grp"><span class="lbl">Author</span><span class="val">Shiva Reddy Peddireddy</span></div>
     <div class="grp"><span class="lbl">License</span><span class="val">MIT</span></div>
     <div class="grp"><span class="lbl">Stage</span><span class="val">v0.1 POC · April 2026</span></div>
-    <div class="grp"><span class="lbl">Target</span><span class="val">OpenAI Safety · NeurIPS D&amp;B 2027</span></div>
+    <div class="grp"><span class="lbl">Venue</span><span class="val">Datasets &amp; Benchmarks</span></div>
   </div>
 </footer>
 

@@ -63,6 +63,13 @@ STATE = CorpState()
 
 
 def reset_state() -> CorpState:
-    global STATE
-    STATE = CorpState()
+    """Reset in place so every module holding a reference sees fresh state.
+
+    Tool modules bind ``STATE`` at import time. Replacing this name with a new
+    object leaves those bindings, and any cascade handler closed over the old
+    object, pointing at a different world than the one the harness just seeded.
+    """
+    fresh = CorpState()
+    for f in ("itsm", "ariba", "email", "agent", "config"):
+        setattr(STATE, f, getattr(fresh, f))
     return STATE
