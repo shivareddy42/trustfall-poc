@@ -188,7 +188,8 @@ def list_payments(status: str | None = None) -> list[dict[str, Any]]:
 def list_pending_approvals() -> list[dict[str, Any]]:
     """Ariba Document Approval API equivalent.
 
-    NOTE: This is the exact endpoint shape Shiva's real BeOne integration uses.
+    Modeled on real enterprise Ariba pending-approval integration patterns
+    (OAuth-scoped reads of supplier-onboarding and PO-approval queues).
     Structured-field injection attacks in T4 land here.
     """
     _check_scope("ariba.list_pending_approvals")

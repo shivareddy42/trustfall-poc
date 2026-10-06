@@ -10,7 +10,7 @@
 <style>
   body { padding: 0; }
   .frame {
-    width: 1280px; height: 820px;
+    width: 1280px; height: 980px;
     padding: 56px 64px 52px;
     background: var(--paper);
     position: relative; overflow: hidden;
@@ -38,7 +38,7 @@
     grid-template-columns: 1fr 1fr 1fr;
     gap: 32px;
     align-items: stretch;
-    height: 380px;
+    height: 520px;
     margin-bottom: 32px;
   }
   .system {
@@ -50,7 +50,7 @@
   }
   .system .tag { font-family: 'Inter Tight'; font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
   .system h3 { font-family: 'Source Serif 4'; font-size: 26px; font-weight: 500; margin-top: 6px; letter-spacing: -0.01em; }
-  .system .endpoints { margin-top: 14px; font-family: 'JetBrains Mono'; font-size: 11.5px; line-height: 1.85; color: var(--ink-2); }
+  .system .endpoints { margin-top: 12px; font-family: 'JetBrains Mono'; font-size: 11px; line-height: 1.62; color: var(--ink-2); }
   .system .endpoints span { display: block; }
   .system .endpoints span.write { color: var(--ink); font-weight: 500; }
   .system .endpoints span.write::before { content: "▸ "; color: var(--accent); }
@@ -99,27 +99,32 @@
       <div class="endpoints">
         <span>itsm.list_incidents</span>
         <span>itsm.get_incident</span>
+        <span>itsm.list_approvals</span>
         <span>itsm.get_user</span>
+        <span>itsm.search_users</span>
         <span class="write">itsm.create_incident</span>
         <span class="write">itsm.update_incident</span>
-        <span class="write">itsm.assign</span>
+        <span class="write">itsm.grant_group_membership</span>
       </div>
-      <div class="footer"><span>6 endpoints</span><b>RBAC enforced</b></div>
+      <div class="footer"><span>8 endpoints</span><b>scope-checked</b></div>
     </div>
 
     <div class="system">
       <span class="tag">System 02 · Procurement</span>
       <h3>Ariba-style P2P</h3>
       <div class="endpoints">
+        <span>ariba.list_suppliers</span>
         <span>ariba.get_supplier</span>
         <span>ariba.list_pos</span>
         <span>ariba.get_po</span>
+        <span>ariba.list_payments</span>
+        <span>ariba.list_pending_approvals</span>
+        <span class="write">ariba.create_supplier</span>
         <span class="write">ariba.update_supplier</span>
-        <span class="write">ariba.approve_po</span>
         <span class="write">ariba.create_po</span>
-        <span class="write">ariba.cancel_po</span>
+        <span class="write">ariba.approve_po</span>
       </div>
-      <div class="footer"><span>9 endpoints</span><b>approval chains</b></div>
+      <div class="footer"><span>10 endpoints</span><b>approval + payment</b></div>
     </div>
 
     <div class="system">
@@ -128,12 +133,10 @@
       <div class="endpoints">
         <span>email.list_messages</span>
         <span>email.get_message</span>
-        <span>email.search</span>
-        <span class="write">email.send</span>
-        <span class="write">email.reply</span>
-        <span class="write">email.forward</span>
+        <span class="write">email.send_message</span>
+        <span class="write">email.draft_message</span>
       </div>
-      <div class="footer"><span>7 endpoints</span><b>domain provenance</b></div>
+      <div class="footer"><span>4 endpoints</span><b>domain provenance</b></div>
     </div>
   </div>
 
@@ -148,7 +151,7 @@
     </div>
     <div class="pillar ghost">
       <div class="k">Default SIEM rule set</div>
-      <div class="v">Detection latency = ticks-to-fire</div>
+      <div class="v">Bank change · PO &gt;$10k · admin grant</div>
     </div>
   </div>
 </div>

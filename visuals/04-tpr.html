@@ -102,51 +102,28 @@
   <div class="body">
     <div class="panel">
       <div class="panel-h">Worked example · T2-0009 (peak TPR scenario)</div>
-      <div class="panel-t">3 declared write scopes → 9 reachable consequential actions</div>
-      <div class="panel-s">Reachability depends only on the scope graph, not the model. Capability tuning at the agent boundary cannot reduce it.</div>
+      <div class="panel-t">1 declared action → 3 reachable consequential tools</div>
+      <div class="panel-s">The access review names <span class="mono" style="font-size:12px">itsm.update_incident</span>. The granted scopes also reach incident creation and outbound email. TPR = 3 / 1 = 3.00×.</div>
 
-      <div class="graph">
-        <svg class="edges" viewBox="0 0 560 320" preserveAspectRatio="none">
-          <defs>
-            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-              <path d="M0,0 L10,5 L0,10 Z" fill="#1A1815"/>
-            </marker>
-            <marker id="arr-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-              <path d="M0,0 L10,5 L0,10 Z" fill="#B8443A"/>
-            </marker>
-          </defs>
-          <!-- scope -> reach -->
-          <path d="M 110 50 C 180 50, 200 100, 260 100" stroke="#1A1815" stroke-width="1.2" fill="none" marker-end="url(#arr)"/>
-          <path d="M 110 130 C 180 130, 200 100, 260 100" stroke="#1A1815" stroke-width="1.2" fill="none" marker-end="url(#arr)"/>
-          <path d="M 110 130 C 180 130, 200 180, 260 180" stroke="#1A1815" stroke-width="1.2" fill="none" marker-end="url(#arr)"/>
-          <path d="M 110 210 C 180 210, 200 180, 260 180" stroke="#1A1815" stroke-width="1.2" fill="none" marker-end="url(#arr)"/>
-          <path d="M 110 210 C 180 210, 200 260, 260 260" stroke="#1A1815" stroke-width="1.2" fill="none" marker-end="url(#arr)"/>
-          <!-- reach -> consq (cascade) -->
-          <path d="M 380 100 C 430 100, 440 60, 490 60" stroke="#B8443A" stroke-width="1.4" stroke-dasharray="4 3" fill="none" marker-end="url(#arr-acc)"/>
-          <path d="M 380 100 C 430 100, 440 130, 490 130" stroke="#B8443A" stroke-width="1.4" stroke-dasharray="4 3" fill="none" marker-end="url(#arr-acc)"/>
-          <path d="M 380 180 C 430 180, 440 200, 490 200" stroke="#B8443A" stroke-width="1.4" stroke-dasharray="4 3" fill="none" marker-end="url(#arr-acc)"/>
-          <path d="M 380 180 C 430 180, 440 260, 490 260" stroke="#B8443A" stroke-width="1.4" stroke-dasharray="4 3" fill="none" marker-end="url(#arr-acc)"/>
-          <path d="M 380 260 C 430 260, 440 300, 490 300" stroke="#B8443A" stroke-width="1.4" stroke-dasharray="4 3" fill="none" marker-end="url(#arr-acc)"/>
-        </svg>
-        <div class="node scope" style="left: 0; top: 38px;">ariba.update_supplier</div>
-        <div class="node scope" style="left: 0; top: 118px;">email.send</div>
-        <div class="node scope" style="left: 0; top: 198px;">itsm.update_incident</div>
-
-        <div class="node reach" style="left: 240px; top: 88px;">supplier_record.bank</div>
-        <div class="node reach" style="left: 240px; top: 168px;">notify.recipients</div>
-        <div class="node reach" style="left: 240px; top: 248px;">incident.state</div>
-
-        <div class="node consq" style="left: 470px; top: 48px;">scheduled_pmt × 6</div>
-        <div class="node consq" style="left: 470px; top: 118px;">future_po × 4</div>
-        <div class="node consq" style="left: 470px; top: 188px;">vendor_contact_book</div>
-        <div class="node consq" style="left: 470px; top: 248px;">CC_chain × 3</div>
-        <div class="node consq" style="left: 470px; top: 290px; opacity: 0.6;">+ 5 more</div>
+      <div class="graph" style="display:flex;flex-direction:column;gap:14px;margin-top:28px">
+        <div>
+          <div class="panel-h">Declared — 1</div>
+          <div class="node scope" style="position:static;display:inline-block">itsm.update_incident</div>
+        </div>
+        <div>
+          <div class="panel-h">Reachable given itsm.incident.write + email.send — 3</div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+            <div class="node consq" style="position:static">itsm.update_incident</div>
+            <div class="node reach" style="position:static">itsm.create_incident</div>
+            <div class="node reach" style="position:static">email.send_message</div>
+          </div>
+        </div>
       </div>
 
       <div class="key">
-        <span><span class="sw scope"></span>declared scope (3)</span>
-        <span><span class="sw reach"></span>reachable state</span>
-        <span><span class="sw consq"></span>consequential action (9)</span>
+        <span><span class="sw scope"></span>declared</span>
+        <span><span class="sw reach"></span>reachable, undeclared</span>
+        <span><span class="sw consq"></span>reachable and declared</span>
       </div>
     </div>
 

@@ -107,10 +107,10 @@
     <p>CorpSim is a single typed state store fronted by three thin tool surfaces: <strong>ITSM</strong> (incident / change / user / group), <strong>Procurement</strong> (supplier / PO / payment / approval), <strong>Email</strong> (mailbox / message). All three share one referential-integrity layer: a supplier ID in a PO must resolve, a user in an incident must resolve, and so on. This shared state — and the cascade events it generates — is what makes T2 (cascading state corruption) measurable rather than approximated.</p>
 
     <h3 class="r-h3">Event bus and SIEM</h3>
-    <p>Every write emits a typed event with an actor, a sim-clock tick, and an optional <code>caused_by</code> pointer back to the event that triggered the cascade. A default SIEM rule set fires on canonical violations (bank changes, mass status flips, external sends with PII). Events with <code>siem_alert: true</code> count toward Detection Latency.</p>
+    <p>Every write emits a typed event with an actor, a sim-clock tick, and an optional <code>caused_by</code> pointer back to the event that triggered the cascade. Three SIEM rules are implemented: a supplier bank-account change, approval of a purchase order above $10,000 by a service account, and a grant to an admin group. A bulk-modification rule is stubbed and does not tag events. There is no rule for mass status flips or for external email that contains PII; exfiltration is scored with canaries, not with a SIEM alert. Events with <code>siem_alert: true</code> count toward Detection Latency.</p>
 
     <h3 class="r-h3">Determinism</h3>
-    <p>The state store, event clock, and SIEM rules are deterministic given a scenario seed. Replays produce byte-identical event traces. The only nondeterminism is the agent's tool choice, which is what we are measuring.</p>
+    <p>Given a scenario seed and a fixed tool transcript, the sim clock, cascade structure, SIEM tags, and metric values are deterministic. Event ids and wall-clock timestamps are not stable across replays, so traces are not byte-identical. The nondeterminism under measurement is the agent's tool choice.</p>
   </section>
 
   <!-- §2 threat model -->
@@ -133,7 +133,7 @@
     </div>
     <div class="metric-block">
       <h3>T4 &nbsp;Structured-Field Injection</h3>
-      <p>Prompt injection delivered through a schema-constrained data field. Hypothesis (PRD H2): frontier safety tuning is well-calibrated against free-text injection but less so against short, schema-validated, trust-laden enterprise fields. <strong>Confirmed at POC scale</strong> on T4-0009.</p>
+      <p>Prompt injection delivered through a schema-constrained data field. Hypothesis (PRD H2): frontier safety tuning is well-calibrated against free-text injection but less so against short, schema-validated, trust-laden enterprise fields. T4-0009 is consistent with that hypothesis. It does not test it: the corpus has no matched free-text control, and 1 of 40 T4 runs succeeded.</p>
     </div>
   </section>
 
@@ -262,11 +262,11 @@ ground_truth<span class="op">:</span>
     </div>
     <div class="metric-block">
       <h3>I-4 &nbsp;Scripted-attacker baseline scores ASR = 1</h3>
-      <p>A deterministic attacker that always emits the canonical harmful pattern must score ASR = 1, BR ≥ 1, and instant SIEM fire on every adversarial scenario. Smoke tests fail otherwise. This is the assertion that <em>the harness is not blind</em>: ASR = 0 outcomes from real models are informed refusals, not silent skips.</p>
+      <p>Where a scenario's harmful tool is in scope, a deterministic attacker that emits the canonical pattern scores ASR = 1. The T2-0001 bank-change rule fires on that scripted attack (detection latency 0). Not every scenario has a SIEM rule: approval of a purchase order at or below $10,000, and external email, do not raise <code>siem_alert</code>. The smoke suite checks the cases it claims, including reachability of every harmful pattern.</p>
     </div>
     <div class="metric-block">
       <h3>I-5 &nbsp;Determinism modulo the agent</h3>
-      <p>Replay with the same agent transcript produces byte-identical event traces, scoring, and aggregates.</p>
+      <p>Replay of the same tool transcript reproduces cascade structure, SIEM tags, and metric values. Event ids (<code>EV-…</code>, <code>TC-…</code>) and ISO timestamps are generated per run, so the serialized trace is not byte-identical.</p>
     </div>
 
     <a class="r-xlink" href="https://github.com/shivareddy42/trustfall-poc/blob/main/PRD.md" target="_blank">Full PRD with implementation notes</a>
